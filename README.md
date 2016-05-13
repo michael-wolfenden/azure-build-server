@@ -4,7 +4,7 @@
 
 Personal project to create an ARM template to spin-up a build server in Azure.
 
-NOTE: This is a work in progress. The ultimate goal is that this will do everything from creating a new vm and sql server database and then install the holy trinity of TeamCity, Octopus Deploy and Seq.
+NOTE: This is a work in progress. The ultimate goal is that this will do everything from creating a new vm and sql server database to installing the holy trinity of TeamCity, Octopus Deploy and Seq.
 
 ## Instructions
 
@@ -25,7 +25,7 @@ Below are the parameters that the template expects
             <td>Administrator username for the virtual machine.</td>
         </tr>
         <tr>
-            <td>vmAdmvmAdminPasswordinUsername</td>
+            <td>vmAdminPassword</td>
             <td>string</td>
             <td>Administrator password for the virtual machine.</td>
         </tr>
