@@ -84,11 +84,11 @@ The following resources will be created
 * Virtual machine named  `prefix-vm-suffix` 
 * Network interface named  `prefix-nic-suffix` 
 * Network security group named `prefix-nsg-suffix`. The will allow inbound traffic on ports 3389 (RDP), 80 (http), 443 (https)
-* Public IP address named `prefix-pip-suffix`. This will have the dns name provided in the parameters '&lt;vmDnsName&gt;.&lt;resouce group location&gt;.cloudapp.azure.com'
+* Public IP address named `prefix-pip-suffix`. This will have the dns name provided in the parameters, for instance '&lt;vmDnsName&gt;.&lt;resouce group location&gt;.cloudapp.azure.com'
 * Virtual Network named `prefix-vnet-suffix`.
-* Storage account named `sto<unique based on subscription>`. For example `stoufa7qk2m4n6ye`
+* Storage account named `sto<unique string based on subscription>`. For example `stoufa7qk2m4n6ye`
 
-The reason the naming of storage acocunt differs is that it is actually a dns name and has a bunch of restrictions of characters and length. Using the same naming scheme as the other resources caused issue where the name wouldn't be unique or it was too long. This is the workaround.
+The reason the naming of storage account differs is that it is actually a dns name and has a bunch of restrictions of characters and length. Using the same naming scheme as the other resources created issues where the name wouldn't be unique or it was too long. This is the workaround.
 
 ## Vanity Urls
 
