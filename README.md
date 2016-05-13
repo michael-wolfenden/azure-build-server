@@ -68,7 +68,7 @@ Below are the parameters that the template expects
 
 Populate the `template.json` file will the parameter values you require and then run
 
-> Run ./deploy.ps1 $subscriptionId $resourceGroupName $resourceGroupLocation $deploymentName
+> ./deploy.ps1 $subscriptionId $resourceGroupName $resourceGroupLocation $deploymentName
 
 NOTE: If the resouce group does not exist, it will be created
 
