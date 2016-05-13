@@ -104,7 +104,7 @@ and three applications listening on different ports
 
 If you own a domain, for instance
 
-mydomain.com
+http://mydomain.com
 
 Wouldn't it be nicer to have
 
