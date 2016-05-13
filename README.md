@@ -76,8 +76,8 @@ NOTE: If the resouce group does not exist, it will be created
 
 Lets say you have set
 
-* `resourcePrefix` = prefix-
-* `resourceSuffix` = -suffix
+* `resourcePrefix` = `prefix-`
+* `resourceSuffix` = `-suffix`
 
 The following resources will be created
 
