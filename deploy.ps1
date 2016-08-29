@@ -1,5 +1,3 @@
-#./deploy "7677830c-b882-4cfb-b889-ca28ca5865c0" "build-svr1-rg" "Australia East" "build server"
-
 <#
  .SYNOPSIS
     Deploys a template to Azure
