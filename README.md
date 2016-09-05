@@ -168,20 +168,20 @@ Download and extract to a folder, then in that folder create the following `Cadd
 ```
 seq.mydomain.com {
     proxy / localhost:5341 {
-        upstream Host {host}
+        header_upstream Host {host}
     }
 }
 
 teamcity.mydomain.com {
     proxy / localhost:8080 {
-        upstream Host {host}
+        header_upstream Host {host}
         websocket
     }
 }
 
 octopus.mydomain.com {
     proxy / localhost:8081 {
-        upstream Host {host}
+        header_upstream Host {host}
     }
 }
 ```
