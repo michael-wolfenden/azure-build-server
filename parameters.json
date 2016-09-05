@@ -22,6 +22,18 @@
         },
         "resourceSuffix": {
             "value": ""
+        },
+        "sqlServerUsername": {
+            "value": ""
+        },
+        "sqlServerPassword": {
+            "value": ""
+        },
+        "sqlServerEdition": {
+            "value": ""
+        },
+        "sqlServerPerformanceLevel": {
+            "value": ""
         }
     }
 }

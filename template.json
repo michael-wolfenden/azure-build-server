@@ -38,6 +38,45 @@
                 "description": "VM size, for example 'Standard_A2'"
             }
         },
+        "sqlServerUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Administrator username for the SQL Server instance"
+            }
+        },
+        "sqlServerPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Administrator password for the SQL Server instance"
+            }
+        },
+        "sqlServerEdition": {
+            "type": "string",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "The edition of SQL Server"
+            }
+        },
+        "sqlServerPerformanceLevel": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "P1",
+                "P2",
+                "P3"
+            ],
+            "metadata": {
+                "description": "The performance level of of SQL Server for the edition"
+            }
+        },
         "resourcePrefix": {
             "type": "string",
             "metadata": {
@@ -95,6 +134,18 @@
             "dataDiskName": "[concat(parameters('resourcePrefix'), 'vm', '-datadisk', parameters('resourceSuffix'))]",
             "dataDiskUri": "[concat(variables('blobSettings').baseBlobUri, '/', parameters('resourcePrefix'), 'vm', '-datadisk', parameters('resourceSuffix'), '.vhd')]",
             "dataDiskSizeGB": "1000"
+        },
+        // SQL Server Settings
+        "sqlSettings": {
+            "name": "[concat(parameters('resourcePrefix'), 'db', parameters('resourceSuffix'))]",
+            "adminUsername": "[parameters('sqlServerUsername')]",
+            "adminPassword": "[parameters('sqlServerPassword')]",
+            "edition": "[parameters('sqlServerEdition')]",
+            "performanceLevel": "[parameters('sqlServerPerformanceLevel')]",
+            "teamCityDBName": "TeamCityDB",
+            "octopusDBName": "OctopusDB",
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "maxSizeBytes": "1073741824"
         }
     },
     "resources": [
@@ -307,6 +358,72 @@
                     ]
                 }
             }
+        },
+        // SQL Server
+        {
+            "name": "[variables('sqlSettings').name]",
+            "type": "Microsoft.Sql/servers",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "SQL Server"
+            },
+            "apiVersion": "2014-04-01-preview",
+            "properties": {
+                "administratorLogin": "[variables('sqlSettings').adminUsername]",
+                "administratorLoginPassword": "[variables('sqlSettings').adminPassword]",
+                "version": "12.0"
+            },
+            "resources": [
+                {
+                    "name": "[variables('sqlSettings').teamCityDBName]",
+                    "type": "databases",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "TeamCity Database"
+                    },
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/', variables('sqlSettings').name)]"
+                    ],
+                    "properties": {
+                        "edition": "[variables('sqlSettings').edition]",
+                        "collation": "[variables('sqlSettings').collation]",
+                        "maxSizeBytes": "[variables('sqlSettings').maxSizeBytes]",
+                        "requestedServiceObjectiveName": "[variables('sqlSettings').performanceLevel]"
+                    }
+                },
+                {
+                    "name": "[variables('sqlSettings').octopusDBName]",
+                    "type": "databases",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "Octopus Database"
+                    },
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/', variables('sqlSettings').name)]"
+                    ],
+                    "properties": {
+                        "edition": "[variables('sqlSettings').edition]",
+                        "collation": "[variables('sqlSettings').collation]",
+                        "maxSizeBytes": "[variables('sqlSettings').maxSizeBytes]",
+                        "requestedServiceObjectiveName": "[variables('sqlSettings').performanceLevel]"
+                    }
+                },
+                {
+                    "type": "firewallrules",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/', variables('sqlSettings').name)]"
+                    ],
+                    "location": "[resourceGroup().location]",
+                    "name": "AllowAllWindowsAzureIps",
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    }
+                }
+            ]
         }
     ]
 }

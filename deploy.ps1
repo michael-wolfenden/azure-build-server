@@ -58,7 +58,7 @@ Function RegisterRP {
     )
 
     Write-Host "Registering resource provider '$ResourceProviderNamespace'";
-    Register-AzureRmResourceProvider -ProviderNamespace $ResourceProviderNamespace -Force;
+    Register-AzureRmResourceProvider -ProviderNamespace $ResourceProviderNamespace;
 }
 
 #******************************************************************************

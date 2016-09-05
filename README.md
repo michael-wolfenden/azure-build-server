@@ -4,7 +4,7 @@
 
 Personal project to create an ARM template to spin-up a build server in Azure.
 
-NOTE: This is a work in progress. The ultimate goal is that this will do everything from creating a new vm and sql server database to installing the holy trinity of TeamCity, Octopus Deploy and Seq.
+NOTE: This is a work in progress. The ultimate goal is that this will do everything from creating a new vm and sql server database and then install the holy trinity of TeamCity, Octopus Deploy and Seq.
 
 ## Instructions
 
@@ -26,7 +26,7 @@ Below are the parameters that the template expects
         </tr>
         <tr>
             <td>vmAdminPassword</td>
-            <td>string</td>
+            <td>securestring</td>
             <td>Administrator password for the virtual machine.</td>
         </tr>
         <tr>
@@ -52,6 +52,44 @@ Below are the parameters that the template expects
             <td>VM size, for example "Standard_A2" (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/).</td>
         </tr>
         <tr>
+            <td>sqlServerUsername</td>
+            <td>string</td>
+            <td>Administrator username for the SQL Server instance</td>
+        </tr>
+        <tr>
+            <td>sqlServerPassword</td>
+            <td>securestring</td>
+            <td>Administrator password for the SQL Server instance</td>
+        </tr>
+        <tr>
+            <td>sqlServerEdition</td>
+            <td>string</td>
+            <td>
+                The edition of SQL Server
+                <ul>
+                    <li>Basic</li>
+                    <li>Standard</li>
+                    <li>Premium</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>sqlServerPerformanceLevel</td>
+            <td>string</td>
+            <td>
+                The performance level of of SQL Server for the edition
+                <ul>
+                    <li>Basic</li>
+                    <li>S0</li>
+                    <li>S1</li>
+                    <li>S2</li>
+                    <li>P1</li>
+                    <li>P2</li>
+                    <li>P3</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
             <td>resourcePrefix</td>
             <td>string</td>
             <td>The name of all resources (except storage) wil be prefixed with this. Can be blank to not have a prefix.</td>
@@ -66,9 +104,9 @@ Below are the parameters that the template expects
 
 ## Deploying
 
-Populate the `template.json` file will the parameter values you require and then run
+Populate the `template.json` file with the parameter values you require and then run
 
-> ./deploy.ps1 $subscriptionId $resourceGroupName $resourceGroupLocation $deploymentName
+> Run ./deploy.ps1 $subscriptionId $resourceGroupName $resourceGroupLocation $deploymentName
 
 NOTE: If the resouce group does not exist, it will be created
 
@@ -76,8 +114,8 @@ NOTE: If the resouce group does not exist, it will be created
 
 Lets say you have set
 
-* `resourcePrefix` = `prefix-`
-* `resourceSuffix` = `-suffix`
+* `resourcePrefix` = prefix-
+* `resourceSuffix` = -suffix
 
 The following resources will be created
 
@@ -87,14 +125,17 @@ The following resources will be created
 * Public IP address named `prefix-pip-suffix`. This will have the dns name provided in the parameters '&lt;vmDnsName&gt;.&lt;resouce group location&gt;.cloudapp.azure.com'
 * Virtual Network named `prefix-vnet-suffix`.
 * Storage account named `sto<unique based on subscription>`. For example `stoufa7qk2m4n6ye`
+* SQL Server instance named `prefix-db-suffix`.
+* Database named `TeamCityDB`.
+* Database named `OctopusDB`.
 
-The reason the naming of storage acocunt differs is that it is actually a dns name and has a bunch of restrictions of characters and length. Using the same naming scheme as the other resources caused issue where the name wouldn't be unique or it was too long. This is the workaround.
+The reason the naming of storage account differs is that it is actually a dns name and has a bunch of restrictions of characters and length. Using the same naming scheme as the other resources caused issue where the name wouldn't be unique or it was too long. This is the workaround.
 
 ## Vanity Urls
 
 At the end of this process you have a dns name for the virtual machine, for instance:
 
-http://mybuildserver.australiaeast.cloudapp.azure.com'
+`mybuildserver.australiaeast.cloudapp.azure.com`
 
 and three applications listening on different ports
 
@@ -104,7 +145,7 @@ and three applications listening on different ports
 
 If you own a domain, for instance
 
-http://mydomain.com
+mydomain.com
 
 Wouldn't it be nicer to have
 
@@ -114,11 +155,11 @@ Wouldn't it be nicer to have
 
 To do this, firstly setup `CNAME` records as follows
 
-```
-CNAME | seq | mybuildserver.australiaeast.cloudapp.azure.com
-CNAME | teamcity | mybuildserver.australiaeast.cloudapp.azure.com
-CNAME | octopus | mybuildserver.australiaeast.cloudapp.azure.com
-```
+| Record  | Name | Uri |
+| ------------- | ------------- | ------------- |
+| CNAME | seq | mybuildserver.australiaeast.cloudapp.azure.com |
+| CNAME | teamcity | mybuildserver.australiaeast.cloudapp.azure.com |
+| CNAME | octopus | mybuildserver.australiaeast.cloudapp.azure.com |
 
 To make this work, we need a reverse proxy running on the virtual machine. You could use IIS, but a far better option is [Caddy](https://caddyserver.com) (a HTTP/2 web server with automatic HTTPS).
 
@@ -127,20 +168,20 @@ Download and extract to a folder, then in that folder create the following `Cadd
 ```
 seq.mydomain.com {
     proxy / localhost:5341 {
-        proxy_header Host {host}
+        upstream Host {host}
     }
 }
 
 teamcity.mydomain.com {
     proxy / localhost:8080 {
-        proxy_header Host {host}
+        upstream Host {host}
         websocket
     }
 }
 
 octopus.mydomain.com {
     proxy / localhost:8081 {
-        proxy_header Host {host}
+        upstream Host {host}
     }
 }
 ```
@@ -152,4 +193,3 @@ Let me say that again, Caddy will automatically handle certificate registration 
 Currently though, Caddy only runs as an exe (they are adding the option to run as a windows service). To get around this use [NSSM - the Non-Sucking Service Manager](https://nssm.cc/). Exract the exe into the same directory as Caddy and run `nssm install Caddy`. Configure the parameters and your good to go, you now have have Caddy running as a windows service.
 
 NOTE: You need to add an inbound firewall rule for ports 80 and 443 for Caddy to work
-
